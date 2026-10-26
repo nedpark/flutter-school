@@ -1,36 +1,68 @@
 ## Day 6 
-# Flutter와 위젯과 레이아웃
+# Flutter 프레임워크 (레고 블록 위젯과 레이아웃, Material 3)
 
-## 주요위젯
+드디어 오늘부터 진짜 스마트폰 화면을 만드는 **Flutter(플러터)**의 세계로 들어왔습니다!  
+스마트폰 화면에 글자를 띄우고, 버튼을 배치하고, 다른 화면으로 넘어가는 법을 배웁니다.
 
-### Text
-텍스트를 표시
-```dart
-Text('안녕하세요, Flutter!');
-```
+---
+
+## 📱 DartPad를 Flutter 모드로 전환하기
+
+[DartPad](https://dartpad.dev/)를 열고 다음 순서로 모드를 변경하세요:
+1. 상단 메뉴의 **`New Pad`** 버튼을 누릅니다.
+2. 팝업창에서 **`Flutter`**를 선택하고 Create를 누릅니다.
+3. 오른쪽 화면이 검은 콘솔창에서 **스마트폰 모양의 흰 화면(Preview)**으로 바뀝니다!
+
+---
+
+## 🧱 Flutter의 대원칙: "모든 것은 위젯(Widget)이다!"
+
+Flutter에서 화면을 만드는 과정은 **레고 블록을 조립하는 것**과 같습니다:
+
+- **MaterialApp**: 앱 전체를 감싸는 가장 큰 도화지이자 테마 설정 바구니입니다.
+  - **Scaffold**: 스마트폰 한 페이지의 뼈대(지붕 AppBar, 몸통 Body, 둥근 버튼 등)를 잡아줍니다.
+    - **AppBar**: 상단 제목 표시줄 영역입니다.
+    - **Body**: 화면의 실제 콘텐츠가 채워지는 본문 영역입니다.
+      - **Center**: 자식 위젯을 가운데로 정렬해주는 배치 위젯입니다.
+        - **Text**: 화면에 실제로 표시되는 텍스트 위젯입니다.
+
+---
+
+## 1. 첫 번째 Flutter 앱 만들어보기
 
 ```dart
 import 'package:flutter/material.dart';
 
+// 1. 앱의 시작점: runApp() 함수가 우리가 만든 앱 위젯을 화면에 띄웁니다.
 void main() {
-  runApp(MyApp());
+  runApp(const MyFirstApp());
 }
 
-class MyApp extends StatelessWidget {
+// 2. 변하지 않는 정적 화면: StatelessWidget을 상속받습니다.
+class MyFirstApp extends StatelessWidget {
+  const MyFirstApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false, // 오른쪽 상단 'DEBUG' 리본 숨기기
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        useMaterial3: true, // 최신 구글 Material 3 디자인 적용
+      ),
       home: Scaffold(
         appBar: AppBar(
-          title: Text('텍스트 예제'),
+          title: const Text('나의 첫 번째 플러터 앱'),
+          backgroundColor: Colors.blueAccent,
+          foregroundColor: Colors.white,
         ),
-        body: Center(
+        body: const Center(
           child: Text(
-            '안녕하세요, Flutter!',
-            style: TextStyle( // 스타일을 추가하여 가독성을 높임
-              fontSize: 24.0,
+            '반가워요, Flutter! 🚀',
+            style: TextStyle(
+              fontSize: 26,
               fontWeight: FontWeight.bold,
-              color: Colors.blue,
+              color: Colors.blueAccent,
             ),
           ),
         ),
@@ -40,44 +72,41 @@ class MyApp extends StatelessWidget {
 }
 ```
 
-### Image
-이미지를 표시
-```dart
-Image.asset('assets/my_image.png'); // assets 폴더에 있는 이미지 사용
-```
+---
 
-### Icon
-아이콘을 표시
-```dart
-Icon(Icons.home);
-```
+## 2. 기본 표시 위젯들 (글자, 아이콘, 이미지)
+
+> [!NOTE]
+> **DartPad에서의 이미지 출력 꿀팁**  
+> DartPad는 로컬 컴퓨터의 파일(`assets/`)을 읽을 수 없습니다. 따라서 실습 시에는 인터넷 URL로 이미지를 불러오는 **`Image.network()`**나 내장 벡터 아이콘인 **`FlutterLogo()`**를 사용해야 에러 없이 바로 화면에 뜹니다!
 
 ```dart
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(MyApp());
-}
+void main() => runApp(const WidgetDemoApp());
 
-class MyApp extends StatelessWidget {
+class WidgetDemoApp extends StatelessWidget {
+  const WidgetDemoApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: Text('아이콘 예제'),
-        ),
-        body: Center( // 아이콘을 화면 중앙에 배치
-          child: Column( // 아이콘과 텍스트를 함께 보여주기 위해 Column 사용
-            mainAxisAlignment: MainAxisAlignment.center, // Column 내 요소 중앙 정렬
-            children: [
-              Icon(
-                Icons.home, // 홈 아이콘
-                size: 50.0, // 아이콘 크기 설정
-                color: Colors.blue, // 아이콘 색상 설정
-              ),
-              SizedBox(height: 10), // 아이콘과 텍스트 사이 간격 추가
-              Text("홈 아이콘"), // 아이콘 설명 텍스트
+        appBar: AppBar(title: const Text('기본 표시 위젯')),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const [
+              // 1. 아이콘 위젯 (크기와 색상 조절 가능)
+              Icon(Icons.favorite, size: 60, color: Colors.redAccent),
+              SizedBox(height: 16), // 위아래 여백을 주는 투명 상자
+
+              // 2. 플러터 기본 로고 위젯
+              FlutterLogo(size: 80),
+              SizedBox(height: 16),
+
+              // 3. 텍스트 위젯
+              Text('아이콘과 로고가 예쁘게 배치되었습니다!'),
             ],
           ),
         ),
@@ -87,217 +116,56 @@ class MyApp extends StatelessWidget {
 }
 ```
 
+---
 
-### Container
-다른 위젯을 감싸고 스타일을 적용하는 위젯
-```dart
-Container(
-  padding: EdgeInsets.all(16.0),
-  decoration: BoxDecoration(
-    color: Colors.blue,
-  ),
-  child: Text('컨테이너 예제'),
-);
-```
+## 3. 버튼 4총사 (Material 3 버튼)
+
+용도와 중요도에 따라 4가지 스타일의 버튼을 적절히 골라 씁니다.
 
 ```dart
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(MyApp());
-}
+void main() => runApp(const ButtonDemoApp());
 
-class MyApp extends StatelessWidget {
+class ButtonDemoApp extends StatelessWidget {
+  const ButtonDemoApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: Text('컨테이너 예제'),
-        ),
-        body: Center( // 컨테이너를 화면 중앙에 배치
-          child: Container(
-            padding: EdgeInsets.all(16.0), // 모든 방향으로 16픽셀의 패딩
-            decoration: BoxDecoration(
-              color: Colors.blue, // 배경색을 파란색으로 설정
-              borderRadius: BorderRadius.circular(10.0), // 모서리를 둥글게 설정
-              boxShadow: [ // 그림자 효과 추가
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.5),
-                  spreadRadius: 5,
-                  blurRadius: 7,
-                  offset: Offset(0, 3), // 그림자 위치 조정
-                ),
-              ],
-            ),
-            child: Text(
-              '컨테이너 예제',
-              style: TextStyle(
-                color: Colors.white, // 텍스트 색상을 흰색으로 설정
-                fontSize: 20.0,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-```
-
-### Row
-위젯을 가로로 배치하는 위젯
-```dart
-Row(
-  children: [
-    Icon(Icons.star),
-    Text('별'),
-  ],
-);
-```
-
-```dart
-import 'package:flutter/material.dart';
-
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text('Row 예제'),
-        ),
-        body: Center( // Row를 화면 중앙에 배치
-          child: Container( // Row 주변에 여백을 주기 위한 Container
-            padding: EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.black), //테두리 추가
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround, // 주축 정렬 방식 설정
-              crossAxisAlignment: CrossAxisAlignment.center, // 교차축 정렬 방식 설정
-              mainAxisSize: MainAxisSize.min, // Row의 크기를 내용물에 맞게 조절
-              children: [
-                Icon(
-                  Icons.star,
-                  size: 40,
-                  color: Colors.amber,
-                ),
-                SizedBox(width: 10), // 아이콘과 텍스트 사이 간격 추가
-                Text(
-                  '별',
-                  style: TextStyle(fontSize: 24),
-                ),
-                SizedBox(width: 10),
-                ElevatedButton(onPressed: (){}, child: Text("버튼"))
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-```
-
-### Column
-위젯을 세로로 배치하는 위젯
-```dart
-Column(
-  children: [
-    Text('위'),
-    Text('아래'),
-  ],
-);
-```
-
-```dart
-import 'package:flutter/material.dart';
-
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text('Column 예제'),
-        ),
-        body: Center( // Column을 화면 중앙에 배치
-          child: Container( // Column 주변에 여백을 주기 위한 Container
-            padding: EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.black),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceAround, // 주축 정렬 방식 설정
-              crossAxisAlignment: CrossAxisAlignment.center, // 교차축 정렬 방식 설정
-              mainAxisSize: MainAxisSize.min, // Column의 크기를 내용물에 맞게 조절
-              children: [
-                Text(
-                  '위',
-                  style: TextStyle(fontSize: 24),
-                ),
-                SizedBox(height: 10), // 텍스트 사이 간격 추가
-                Text(
-                  '아래',
-                  style: TextStyle(fontSize: 24),
-                ),
-                SizedBox(height: 10),
-                ElevatedButton(onPressed: (){}, child: Text("버튼"))
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-```
-
-## 레이아웃
-
-### Center
-위젯을 가운데 정렬
-```dart
-Center(
-  child: Text('가운데'),
-);
-```
-
-```dart
-import 'package:flutter/material.dart';
-
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text('Center 예제'),
-        ),
+        appBar: AppBar(title: const Text('Material 3 버튼 종류')),
         body: Center(
-          child: Container( // Center된 영역을 시각적으로 확인하기 위한 Container
-            padding: EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.black),
-            ),
-            child: Text(
-              '가운데',
-              style: TextStyle(fontSize: 24),
-            ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // 1. 가장 강조하고 싶을 때 (주 행동 버튼)
+              FilledButton(
+                onPressed: () => print('FilledButton 클릭!'),
+                child: const Text('1. 채워진 버튼 (FilledButton)'),
+              ),
+              const SizedBox(height: 12),
+
+              // 2. 입체감 있는 그림자 버튼
+              ElevatedButton(
+                onPressed: () => print('ElevatedButton 클릭!'),
+                child: const Text('2. 입체 버튼 (ElevatedButton)'),
+              ),
+              const SizedBox(height: 12),
+
+              // 3. 테두리만 있는 보조 버튼
+              OutlinedButton(
+                onPressed: () => print('OutlinedButton 클릭!'),
+                child: const Text('3. 테두리 버튼 (OutlinedButton)'),
+              ),
+              const SizedBox(height: 12),
+
+              // 4. 배경 없는 텍스트 전용 버튼 (취소 등)
+              TextButton(
+                onPressed: () => print('TextButton 클릭!'),
+                child: const Text('4. 텍스트 버튼 (TextButton)'),
+              ),
+            ],
           ),
         ),
       ),
@@ -306,221 +174,78 @@ class MyApp extends StatelessWidget {
 }
 ```
 
-### Padding
-위젯의 여백을 설정
-```dart
-Padding(
-  padding: EdgeInsets.all(20.0),
-  child: Text('여백'),
-);
-```
+---
+
+## 4. 레이아웃의 핵심: Row와 Column의 가로·세로 축 완전 정복!
+
+초보자가 레이아웃에서 가장 많이 혼란스러워하는 것이 바로 **Row(가로)**와 **Column(세로)**의 정렬 축입니다:
+
+- **Row (가로 방향으로 나란히 배치)**:
+  - **주축 (Main Axis)**: **가로 방향** (왼쪽 ➔ 오른쪽)
+  - **교차축 (Cross Axis)**: **세로 방향** (위 ➔ 아래)
+- **Column (세로 방향으로 나란히 배치)**:
+  - **주축 (Main Axis)**: **세로 방향** (위 ➔ 아래)
+  - **교차축 (Cross Axis)**: **가로 방향** (왼쪽 ➔ 오른쪽)
+
+- **`mainAxisAlignment` (주축 정렬 옵션)**:
+  - `MainAxisAlignment.start`: 시작점에 모으기 (기본값)
+  - `MainAxisAlignment.center`: 한가운데 모으기
+  - `MainAxisAlignment.spaceEvenly`: 여백을 균등하게 나누어 배치
+  - `MainAxisAlignment.spaceBetween`: 양 끝에 딱 붙이고 사이 간격 벌리기
+
+---
+
+## 5. 화면 넘어가기: 네비게이션 (접시 쌓기 원리)
+
+Flutter에서 화면 전환은 식당의 **"접시 쌓기(Stack)"** 원리와 같습니다:
+
+- **화면 열기 (`Navigator.push`)**: 기존 화면 위에 새 화면 접시를 한 장 얹어 화면을 덮습니다.
+- **화면 닫기 (`Navigator.pop`)**: 맨 위에 얹혀 있던 화면 접시를 걷어내어 원래 보던 이전 화면으로 복귀합니다.
 
 ```dart
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(MyApp());
-}
+void main() => runApp(const MaterialApp(home: ScreenOne()));
 
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text('Padding 예제'),
-        ),
-        body: Center( // Padding된 영역을 확인하기 쉽게 Center로 감쌈
-          child: Container( // Padding 영역을 시각적으로 확인하기 위한 Container
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.black), // 테두리 추가
-            ),
-            child: Padding(
-              padding: EdgeInsets.all(20.0),
-              child: Text(
-                '여백',
-                style: TextStyle(fontSize: 24),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-```
+// 첫 번째 화면
+class ScreenOne extends StatelessWidget {
+  const ScreenOne({super.key});
 
-### Expanded
-부모 위젯의 남은 공간을 채우도록 위젯을 확장
-```dart
-Row(
-  children: [
-    Expanded(
-      child: Container(color: Colors.red),
-    ),
-    Expanded(
-      flex: 2, // 다른 Expanded 위젯보다 2배의 공간 차지
-      child: Container(color: Colors.blue),
-    ),
-  ],
-);
-```
-
-```dart
-import 'package:flutter/material.dart';
-
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text('Expanded 예제'),
-        ),
-        body: Column( // Expanded를 포함하는 Row를 Column으로 감싸서 화면 전체를 채우도록 함
-          children: [
-            Expanded( // Column의 남은 공간을 모두 채우도록 Expanded 적용
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      color: Colors.red,
-                      child: Center(child: Text('1', style: TextStyle(color: Colors.white))), // 내용 추가
-                    ),
-                  ),
-                  Expanded(
-                    flex: 2,
-                    child: Container(
-                      color: Colors.blue,
-                      child: Center(child: Text('2', style: TextStyle(color: Colors.white))),// 내용 추가
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(child: Container(color: Colors.green, child: Center(child: Text('아래', style: TextStyle(color: Colors.white))))),
-          ],
-        ),
-      ),
-    );
-  }
-}
-```
-
-### ListView
-스크롤 가능한 목록을 생성
-```dart
-ListView(
-  children: [
-    ListTile(title: Text('항목 1')),
-    ListTile(title: Text('항목 2')),
-    ListTile(title: Text('항목 3')),
-  ],
-);
-```
-
-```dart
-import 'package:flutter/material.dart';
-
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text('ListView 예제'),
-        ),
-        body: ListView(
-          padding: const EdgeInsets.all(8), // ListView 주변에 여백 추가
-          children: <Widget>[
-            ListTile(
-              leading: Icon(Icons.star), // leading 아이콘 추가
-              title: Text('항목 1'),
-              trailing: Icon(Icons.arrow_forward_ios), // trailing 아이콘 추가
-              onTap: () { // 탭 이벤트 처리
-                print('항목 1 탭!');
-              },
-            ),
-            Divider(height: 1, thickness: 1,), // 항목 사이에 구분선 추가
-            ListTile(
-              leading: Icon(Icons.android),
-              title: Text('항목 2'),
-              subtitle: Text('부제목'), // 부제목 추가
-              onLongPress: (){ // 길게 누르기 이벤트 처리
-                print("항목 2 롱프레스!");
-              },
-            ),
-            Divider(height: 1, thickness: 1,),
-            ListTile(
-              title: Text('항목 3'),
-              dense: true, // ListTile의 높이를 줄임
-              tileColor: Colors.grey[200], // ListTile 배경색 설정
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-```
-
-## 네비게이션
-
-### Navigator.push
-새로운 화면으로 이동
-```dart
-Navigator.push(
-  context,
-  MaterialPageRoute(builder: (context) => SecondScreen()),
-);
-```
-
-```dart
-import 'package:flutter/material.dart';
-
-void main() {
-  runApp(MaterialApp(home: FirstScreen()));
-}
-
-class FirstScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('첫 번째 화면')),
+      appBar: AppBar(title: const Text('1번 화면')),
       body: Center(
-        child: ElevatedButton(
+        child: FilledButton(
           onPressed: () {
+            // Navigator.push: 2번 화면 접시를 위에 얹어라!
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => SecondScreen()),
+              MaterialPageRoute(builder: (context) => const ScreenTwo()),
             );
           },
-          child: Text('두 번째 화면으로 이동'),
+          child: const Text('2번 화면으로 가기 ➔'),
         ),
       ),
     );
   }
 }
 
-class SecondScreen extends StatelessWidget {
+// 두 번째 화면
+class ScreenTwo extends StatelessWidget {
+  const ScreenTwo({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('두 번째 화면')),
+      appBar: AppBar(title: const Text('2번 화면'), backgroundColor: Colors.teal),
       body: Center(
-        child: ElevatedButton(
+        child: OutlinedButton(
           onPressed: () {
+            // Navigator.pop: 현재 화면 접시를 치우고 뒤로 돌아가라!
             Navigator.pop(context);
           },
-          child: Text('첫 번째 화면으로 돌아가기'),
+          child: const Text('⬅️ 1번 화면으로 돌아가기'),
         ),
       ),
     );
@@ -528,263 +253,45 @@ class SecondScreen extends StatelessWidget {
 }
 ```
 
-## 예제코드 1
+---
+
+## 🎯 직접 해보기 (Mini Challenge)
+
+**문제**: `Column` 위젯 안에 좋아하는 과일 이름 3개를 세로로 나란히 띄워보세요!
+- 3개의 `Text` 위젯 사이에 `SizedBox(height: 10)`를 넣어 적절한 간격을 주세요.
+- `mainAxisAlignment: MainAxisAlignment.center`를 주어 화면 세로 중앙에 모아보세요.
+
+<details>
+<summary>👉 정답 예시 보기 (클릭하여 펼치기)</summary>
 
 ```dart
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(CalculatorApp());
-}
+void main() => runApp(const MyFruitApp());
 
-class CalculatorApp extends StatelessWidget {
+class MyFruitApp extends StatelessWidget {
+  const MyFruitApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: CalculatorScreen(),
-    );
-  }
-}
-
-class CalculatorScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('계산기'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0), // 화면 여백 추가
-        child: Column( // 버튼들을 세로로 배치하기 위해 Column 사용
-          children: [
-            Row( // 숫자 버튼들을 가로로 배치
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                buildNumberButton('1'),
-                buildNumberButton('2'),
-                buildNumberButton('3'),
-                buildNumberButton('4'),
-              ],
-            ),
-            SizedBox(height: 8), // 버튼 사이 간격 추가
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                buildNumberButton('5'),
-                buildNumberButton('6'),
-                buildNumberButton('7'),
-                buildNumberButton('8'),
-              ],
-            ),
-            SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                buildNumberButton('9'),
-                buildNumberButton('0'),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // 숫자 버튼 생성 함수
-  Widget buildNumberButton(String number) {
-    return Expanded( // 버튼이 Row 내에서 균등하게 공간을 차지하도록 함
-      child: Padding( // 버튼 주변에 여백 추가
-        padding: const EdgeInsets.all(4.0),
-        child: ElevatedButton(
-          onPressed: () {
-            // 버튼 클릭 시 동작 (추후 계산 로직 추가)
-            print('$number 버튼 클릭!');
-          },
-          child: Text(
-            number,
-            style: TextStyle(fontSize: 24), // 텍스트 크기 조정
-          ),
-        ),
-      ),
-    );
-  }
-}
-```
-
-## 예제코드 2
-
-```dart
-import 'package:flutter/material.dart';
-
-void main() {
-  runApp(CalculatorApp());
-}
-
-class CalculatorApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: CalculatorScreen(),
-    );
-  }
-}
-
-class CalculatorScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('계산기'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            buildNumberRow(['1', '2', '3', '4'], context), // 수정된 부분
-            SizedBox(height: 8),
-            buildNumberRow(['5', '6', '7', '8'], context), // 수정된 부분
-            SizedBox(height: 8),
-            buildNumberRow(['9', '0'], context), // 수정된 부분
-          ],
-        ),
-      ),
-    );
-  }
-
-  // 숫자 버튼 행 생성 함수 (수정됨)
-  Widget buildNumberRow(List<String> numbers, BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: numbers.map((number) {
-        return Expanded(
-          child: Padding(
-            padding: const EdgeInsets.all(4.0),
-            child: ElevatedButton(
-              onPressed: () {
-                // 네비게이션 코드 추가
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ResultScreen(selectedNumber: number),
-                  ),
-                );
-              },
-              child: Text(
-                number,
-                style: TextStyle(fontSize: 24),
-              ),
-            ),
-          ),
-        );
-      }).toList(),
-    );
-  }
-}
-
-// 결과를 보여주는 새로운 화면
-class ResultScreen extends StatelessWidget {
-  final String selectedNumber;
-
-  const ResultScreen({required this.selectedNumber});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('선택된 숫자'),
-      ),
-      body: Center(
-        child: Text(
-          '선택된 숫자: $selectedNumber',
-          style: TextStyle(fontSize: 32),
-        ),
-      ),
-    );
-  }
-}
-```
-
-### 예제코드 3
-
-```dart
-import 'package:flutter/material.dart';
-
-void main() {
-  runApp(CalculatorApp());
-}
-
-class CalculatorApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: CalculatorScreen(),
-    );
-  }
-}
-
-class CalculatorScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    List<String> numbers = List.generate(10, (index) => index.toString());
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('숫자 선택'),
-      ),
-      body: Center( // Center 위젯으로 중앙 정렬
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
+      home: Scaffold(
+        appBar: AppBar(title: const Text('좋아하는 과일 목록')),
+        body: Center(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center, // Column 내부 중앙 정렬
-            children: numbers.map((number) => buildNumberButton(number, context)).toList(),
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const [
+              Text('🍎 사과', style: TextStyle(fontSize: 24)),
+              SizedBox(height: 10),
+              Text('🍌 바나나', style: TextStyle(fontSize: 24)),
+              SizedBox(height: 10),
+              Text('🍓 딸기', style: TextStyle(fontSize: 24)),
+            ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget buildNumberButton(String number, BuildContext context) {
-    return Padding( // 버튼 사이에 간격 추가
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: SizedBox( // 버튼 크기 고정
-        width: double.infinity, // 부모의 가로 폭에 맞춤
-        child: ElevatedButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ResultScreen(selectedNumber: number),
-              ),
-            );
-          },
-          child: Text(
-            number,
-            style: TextStyle(fontSize: 24),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class ResultScreen extends StatelessWidget {
-  final String selectedNumber;
-
-  const ResultScreen({required this.selectedNumber});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('선택된 숫자'),
-      ),
-      body: Center(
-        child: Text(
-          '선택된 숫자: $selectedNumber',
-          style: TextStyle(fontSize: 32),
         ),
       ),
     );
   }
 }
 ```
+</details>

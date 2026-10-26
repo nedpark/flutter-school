@@ -1,297 +1,164 @@
 ## Day 5 
-# Dart 언어
+# Dart 언어 기초 (함수형 프로그래밍과 유용한 꿀팁)
 
-## 함수형 프로그래밍
+Dart 언어 공부의 마지막 날입니다! 내일부터는 드디어 실제 스마트폰 화면을 만드는 Flutter로 넘어갑니다.  
+오늘은 코드를 훨씬 짧고 우아하게 만들어주는 **함수형 프로그래밍(Functional Programming)** 기법들과 실무 꿀팁 문법들을 배웁니다.
 
-일급 객체 (First-class Citizens)
-- 함수를 변수에 할당, 함수의 인자로 전달, 함수의 반환값으로 사용할 수 있다는 의미입니다.
+---
+
+## 1. 함수형 프로그래밍이란? (요리 레시피 전달하기)
+
+일반적인 코딩이 "재료를 썰어라, 냄비에 넣어라, 불을 켜라" 하고 일일이 지시하는 방식이라면,  
+함수형 코딩은 **"자, 여기 가공 레시피(함수)가 있으니 컨베이어 벨트를 통과시켜서 완성해줘!"**라고 선언하는 방식입니다.
+
+데이터 원본을 훼손하지 않고, 깔끔하게 새로운 결과 목록을 만들어냅니다.
+
+---
+
+## 2. 컬렉션 가공 삼총사 (`where`, `map`, `fold`)
+
+리스트 데이터를 다룰 때 가장 많이 쓰이는 3가지 대표 가공 메서드입니다:
+
+1. **`where` (체로 거르기 / 필터링)**: 리스트 안에서 특정 조건(예: 짝수만)을 만족하는 알맹이만 골라냅니다.
+2. **`map` (공장 컨베이어 벨트 변환)**: 모든 요소를 정해진 규칙(예: 과일 ➔ 주스로 변환, 숫자 ➔ 2배)에 따라 다른 형태로 바꿉니다.
+3. **`fold` (눈사람 뭉치기 / 누적 연산)**: 시작값(예: 0)부터 시작하여 요소들을 차례차례 누적해 단 하나의 결과값(총합 등)으로 완성합니다.
 
 ```dart
 void main() {
-  void greet(String name) {
-    print('Hello, $name!');
+  List<int> numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
+  // 1. where: 체에 걸러내듯 원하는 조건만 쏙 뽑아내기 (필터링)
+  var evens = numbers.where((n) => n.isEven);
+  print('짝수만: ${evens.toList()}'); // [2, 4, 6, 8, 10]
+
+  // 2. map: 각 요소를 다른 형태로 변신시키기 (변환)
+  var doubled = numbers.map((n) => n * 2);
+  print('2배로 변신: ${doubled.toList()}'); // [2, 4, 6, 8, ...]
+
+  // 3. fold: 눈덩이를 굴리듯 초기값에서부터 차례차례 누적하기
+  // 0부터 시작해서 (누적값 acc + 현재숫자 curr)을 계속 더함
+  int sum = numbers.fold(0, (acc, curr) => acc + curr);
+  print('1부터 10까지의 총합: $sum'); // 55
+
+  // 4. 메서드 체이닝 (연쇄 작업): 한 줄로 연결해서 처리하기!
+  // "짝수만 골라서 -> 100을 곱한 뒤 -> 예쁜 문자열 목록으로 만들기"
+  List<String> result = numbers
+      .where((n) => n.isEven)
+      .map((n) => '$n점')
+      .toList();
+
+  print('최종 결과: $result'); // [2점, 4점, 6점, 8점, 10점]
+}
+```
+
+> [!TIP]
+> **왜 뒤에 `.toList()`를 붙이나요?**  
+> `where`나 `map`의 결과물은 게으른(Lazy) 상태인 `Iterable` 형태입니다.  
+> 이를 진짜 리스트 사물함 `[ ]`으로 굳혀서 사용하려면 끝에 `.toList()`를 붙여주는 것이 좋습니다.
+
+---
+
+## 3. 계단식 표기법 (Cascade Notation: `..` 와 `?..`)
+
+동일한 객체에게 연달아 심부름을 시킬 때, 이름표를 계속 반복해서 부르지 않고 점 두 개(`..`)로 간결하게 묶는 방법입니다.
+
+```dart
+class Robot {
+  String name = '';
+  int battery = 0;
+
+  void sayHi() => print('삐리비리! 나는 $name 로봇입니다.');
+  void charge() => print('배터리를 100% 충전했습니다.');
+}
+
+void main() {
+  // 계단식 표기법 (..) 사용:
+  // 로봇을 만들고 -> 이름을 짓고 -> 배터리를 채우고 -> 인사하고 -> 충전하기를 한 번에!
+  Robot myRobot = Robot()
+    ..name = '알파고'
+    ..battery = 100
+    ..sayHi()
+    ..charge();
+
+  // 널 안전 계단식 (?..)
+  // 만약 로봇 변수가 null이면 뒤의 심부름을 아예 실행하지 않고 안전하게 패스합니다.
+  Robot? maybeRobot = null;
+  maybeRobot
+    ?..name = '베타'
+    ..sayHi(); // null이므로 에러 없이 조용히 넘어감!
+}
+```
+
+---
+
+## 4. 고급 널 테크닉: `late` 키워드와 타입 승격
+
+### A. `late` 키워드 (지연 초기화 약속)
+"지금 당장은 값을 못 채우지만, **누군가 이 변수를 쓰기 전에는 내가 반드시 값을 채워둘 것을 약속할게!**"라는 키워드입니다.
+
+```dart
+class ProfileCard {
+  // 생성자나 화면이 열리는 시점(initState)에 채워질 것을 약속
+  late final String userToken;
+
+  void loadToken() {
+    userToken = 'secret_abc_123'; // 나중에 채움!
   }
 
-  Function greeter = greet;
-  greeter('Alice');
-
-  void applyTo(String name, Function func) {
-    func(name);
-  }
-
-  applyTo('Bob', greet);
-}
-```
-
-for문 vs. forEach() 함수
-- for문: 일반적인 반복문으로, 리스트의 요소를 순서대로 접근합니다.
-- forEach(): 리스트의 각 요소에 대해 특정 함수를 실행합니다.
-
-```dart
-void main() {
-  List<int> numbers = [1, 2, 3, 4, 5];
-
-  // for문
-  for (int number in numbers) {
-    print(number);
-  }
-
-  // forEach()
-  numbers.forEach((number) => print(number));
-}
-```
-
-where
-- List에서 특정 조건을 만족하는 요소만 추출하여 새로운 List를 반환합니다.
-
-```dart
-void main() {
-  List<int> numbers = [1, 2, 3, 4, 5];
-  List<int> evenNumbers = numbers.where((number) => number % 2 == 0).toList();
-  print(evenNumbers); // [2, 4] 출력
-}
-```
-
-map
-- List의 각 요소에 함수를 적용하여 새로운 List를 생성합니다.
-
-```dart
-void main() {
-  List<int> numbers = [1, 2, 3, 4, 5];
-  List<int> doubledNumbers = numbers.map((number) => number * 2).toList();
-  print(doubledNumbers); // [2, 4, 6, 8, 10] 출력
-}
-```
-
-toList, toSet
-- Iterable을 List 또는 Set으로 변환합니다.
-
-```dart
-void main() {
-  List<int> numbers = [1, 2, 3, 2, 1];
-  Set<int> uniqueNumbers = numbers.toSet();
-  print(uniqueNumbers); // {1, 2, 3} 출력
-}
-```
-
-any
-- List의 요소 중 하나라도 주어진 조건을 만족하는지 확인합니다.
-
-```dart
-void main() {
-  List<int> numbers = [1, 2, 3, 4, 5];
-  bool hasEvenNumber = numbers.any((number) => number % 2 == 0);
-  print(hasEvenNumber); // true 출력
-}
-```
-
-reduce
-- List의 요소들을 누적하여 하나의 값으로 축소합니다.
-
-```dart
-void main() {
-  List<int> numbers = [1, 2, 3, 4, 5];
-  int sum = numbers.reduce((value, element) => value + element);
-  print(sum); // 15 출력
-}
-```
-
-함수형 프로그래밍의 장점
-- 코드 가독성 향상: 간결하고 명확한 코드 작성 가능
-- 재사용성 증가: 함수를 조합하여 다양한 기능 구현 가능
-- 병렬 처리 용이: 각 요소를 독립적으로 처리하기 때문에 병렬 처리에 적합
-- 테스트 용이: 순수 함수를 사용하여 테스트 케이스 작성이 용이
-
-## 그밖의 문법들
-
-### Dart의 계단식 표기법 (Cascade Notation)
-- Dart의 계단식 표기법은 동일한 객체에 대한 연속적인 메서드 호출을 간결하게 표현하는 방법입니다. 마치 계단처럼 메서드 호출을 이어나갈 수 있다는 의미에서 '계단식'이라는 표현을 사용합니다. 주로 객체를 생성하고 초기화하거나 여러 속성을 연속적으로 설정할 때 유용하게 사용됩니다.
-
-```
-객체 .. 메서드1() .. 메서드2() .. 메서드3();
-```
-
-- 객체: 계단식 표기법을 적용할 객체를 지정합니다.
-- ..: 연속적인 메서드 호출을 연결하는 연산자입니다.
-- 메서드1(), 메서드2(), 메서드3(): 객체에 호출할 메서드들입니다.
-
-
-```dart
-class Product {
-  String name;
-  double price;
-  int stock;
-
-  Product({required this.name, required this.price, required this.stock});
-
-  void setName(String newName) {
-    name = newName;
-  }
-
-  void setPrice(double newPrice) {
-    price = newPrice;
-  }
-
-  void setStock(int newStock) {
-    stock = newStock;
-  }
-
-  @override
-  String toString() {
-    return 'Product(name: $name, price: $price, stock: $stock)';
+  void showToken() {
+    print('내 토큰: $userToken');
   }
 }
 
 void main() {
-  var product = Product(name: 'Laptop', price: 999.99, stock: 10)
-    ..setName('Gaming Laptop')
-    ..setPrice(1299.99)
-    ..setStock(5);
-
-  print(product); // Product(name: Gaming Laptop, price: 1299.99, stock: 5)
+  var card = ProfileCard();
+  card.loadToken(); // 값 채우기
+  card.showToken(); // 출력
 }
 ```
 
-### 컬렉션 if 문법
+> [!WARNING]
+> 만약 약속을 어기고 `card.loadToken()`을 실행하지 않은 채 `card.showToken()`을 부르면 `LateInitializationError`가 발생하며 프로그램이 튕깁니다. 꼭 확신이 있을 때만 사용하세요!
 
-Dart 언어의 컬렉션 if 문법은 조건에 따라 컬렉션의 요소를 동적으로 포함시킬 수 있는 유용한 기능입니다. 이 기능을 사용하면 리스트, 맵 또는 셋과 같은 컬렉션에서 조건에 따라 값을 추가하거나 생략할 수 있습니다. 이를 통해 더 간결하고 가독성 높은 코드를 작성할 수 있습니다.
+### B. 스마트 타입 승격 (Type Promotion)
+Dart 컴파일러는 매우 똑똑해서, 우리가 `if (name != null)` 처럼 검사를 거치면 그 블록 안에서는 자동으로 "아, 여긴 절대 null이 아니구나!" 하고 일반 Non-nullable 타입으로 알아서 승격(Promotion)시켜 줍니다.
+
+```dart
+void printNameLength(String? maybeName) {
+  // 여기서는 maybeName이 null일 수도 있으므로 maybeName.length 호출 불가!
+
+  if (maybeName != null) {
+    // 훌륭합니다! Dart가 이 안에서는 maybeName을 진짜 String으로 승격시켜줍니다!
+    print('이름 길이: ${maybeName.length}글자');
+  } else {
+    print('이름이 비어있습니다.');
+  }
+}
+```
+
+---
+
+## 🎯 직접 해보기 (Mini Challenge)
+
+**문제**: 5개의 단어가 들어있는 리스트가 있습니다.
+`List<String> words = ['apple', 'banana', 'cat', 'elephant', 'dog'];`
+- 글자 수가 4글자 이상인 단어만 골라내서(`where`)
+- 대문자로 변환(`map((w) => w.toUpperCase())`)한 뒤
+- 새로운 리스트로 출력해보세요!
+
+<details>
+<summary>👉 정답 예시 보기 (클릭하여 펼치기)</summary>
 
 ```dart
 void main() {
-  bool includeExtraItem = true;
+  List<String> words = ['apple', 'banana', 'cat', 'elephant', 'dog'];
 
-  var items = [
-    'Item 1',
-    'Item 2',
-    if (includeExtraItem) 'Extra Item',
-  ];
+  List<String> bigWords = words
+      .where((w) => w.length >= 4)
+      .map((w) => w.toUpperCase())
+      .toList();
 
-  print(items); // ['Item 1', 'Item 2', 'Extra Item']
+  print(bigWords); // [APPLE, BANANA, ELEPHANT]
 }
 ```
-
-```dart
-void main() {
-  bool isAdmin = false;
-
-  var menuItems = [
-    'Home',
-    'Profile',
-    'Settings',
-    if (isAdmin) 'Admin Panel',
-  ];
-
-  print(menuItems); // ['Home', 'Profile', 'Settings']
-}
-```
-
-```dart
-void main() {
-  bool hasDiscount = true;
-
-  var productInfo = {
-    'name': 'Laptop',
-    'price': 999.99,
-    if (hasDiscount) 'discount': 100.00,
-  };
-
-  print(productInfo); // {'name': 'Laptop', 'price': 999.99, 'discount': 100.00}
-}
-```
-
-```dart
-void main() {
-  var numbers = [1, 2, 3, 4, 5];
-
-  // 컬렉션 for 문법과 결합
-  var evenNumbers = [
-    for (var number in numbers)
-      if (number.isEven) number
-  ];
-
-  print(evenNumbers); // [2, 4]
-}
-
-```
-
-### Null 안전성 (Null Safety)
-
-- Dart 2.12부터 Null Safety가 도입되어 변수에 null 값을 할당할 수 있는지 여부를 명시적으로 지정할 수 있습니다. 기본적으로 모든 변수는 null이 될 수 없습니다. 
-- 여기서 int?는 null이 될 수 있는 정수를 나타냅니다. 반면 int는 null이 될 수 없는 정수를 나타냅니다.
-
-```dart
-// Null이 될 수 없는 변수
-int nonNullableInt = 42;
-
-// Null이 될 수 있는 변수
-int? nullableInt;
-nullableInt = null;
-```
-
-### Null 병합 연산자 (??)
-
-- null 병합 연산자는 왼쪽 피연산자가 null인지 확인하고, null이면 오른쪽 피연산자를 반환합니다. 이는 기본값을 제공할 때 유용합니다.
-
-```dart
-int? nullableInt;
-int value = nullableInt ?? 0; // nullableInt가 null이면 0을 사용
-
-```
-
-### Null 접근 연산자 (?.)
-
-- null 접근 연산자는 객체가 null인 경우에도 안전하게 해당 객체의 속성이나 메서드에 접근할 수 있도록 합니다. 객체가 null이면 null을 반환합니다.
-
-```dart
-class Person {
-  String? name;
-}
-
-Person? person;
-String? name = person?.name; // person이 null이면 name은 null
-```
-
-### 강제 null 확인 연산자 (!)
-
-- 강제 null 확인 연산자는 변수나 표현식이 null이 아님을 보장할 때 사용됩니다. 이 연산자는 변수에 null 값이 있으면 예외를 발생시킵니다.
-
-```dart
-int? nullableInt;
-nullableInt = 42;
-int nonNullableInt = nullableInt!; // nullableInt가 null이 아님을 보장
-```
-
-### null-aware 할당 연산자 (??=)
-
-- null-aware 할당 연산자는 변수가 null일 때만 값을 할당합니다.
-
-```dart
-int? nullableInt;
-nullableInt ??= 0; // nullableInt가 null이면 0을 할당
-```
-
-```dart
-void main() {
-  int? a;
-  int b = 5;
-
-  // Null 병합 연산자
-  int c = a ?? b; // a가 null이면 b를 사용
-  print(c); // 5
-
-  // Null 접근 연산자
-  String? name;
-  String? upperName = name?.toUpperCase();
-  print(upperName); // null
-
-  // 강제 null 확인 연산자
-  int? nullableInt = 10;
-  int nonNullableInt = nullableInt!;
-  print(nonNullableInt); // 10
-
-  // null-aware 할당 연산자
-  int? nullableValue;
-  nullableValue ??= 7;
-  print(nullableValue); // 7
-}
-```
+</details>
